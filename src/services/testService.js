@@ -11,8 +11,8 @@ const generateTest = require("../utils/generateTest");
 const path = require("path");
 const fs = require("fs");
 const { randomUUID } = require("crypto");
-const testQueueService = require('./testQueueService');
-const testWorkerService = require('./testWorkerService');
+const testQueueService = require("./testQueueService");
+const testWorkerService = require("./testWorkerService");
 
 /**
  * Создает новый тест с шагами.
@@ -189,14 +189,12 @@ function runTest(testFilePath, browser) {
   return new Promise((resolve, reject) => {
     const formattedTestFilePath = testFilePath?.replaceAll("\\", "/");
     // Используем разные команды для Windows и Linux
-    const command = process.platform === 'win32'
-      ? `npx playwright test ${formattedTestFilePath} --project=${browser}`
-      : `xvfb-run --auto-servernum npx playwright test ${formattedTestFilePath} --project=${browser}`;
+    const command = `npx playwright test ${formattedTestFilePath} --project=${browser}`;
 
     exec(command, (error, stdout, stderr) => {
       console.log("Test output:", stdout);
       console.log("Test errors:", stderr);
-      
+
       if (error) {
         console.error("Test execution error:", error);
         resolve({ status: false, output: stderr || error.message });
