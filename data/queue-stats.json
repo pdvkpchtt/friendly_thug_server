@@ -1,12 +1,12 @@
 {
-  "maxTotalConcurrentTests": 3,
+  "maxTotalConcurrentTests": 15,
   "maxConcurrentTestsPerUser": 3,
   "systemInfo": {
-    "totalMemory": 8420433920,
-    "freeMemory": 1558433792,
-    "cpuCount": 4,
-    "systemLoad": 0,
-    "memoryUsage": "81.49%"
+    "totalMemory": 16893206528,
+    "freeMemory": 4681564160,
+    "cpuCount": 16,
+    "platform": "win32",
+    "arch": "x64"
   },
   "queueStats": {
     "totalTests": 0,
@@ -15,5 +15,5 @@
     "completedTests": 0,
     "failedTests": 0
   },
-  "lastUpdate": "2025-06-22T20:59:19.956Z"
+  "lastUpdate": "2025-06-22T21:08:13.243Z"
 }
