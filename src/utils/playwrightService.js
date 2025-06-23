@@ -14,7 +14,7 @@ class PlaywrightService {
    */
   async init() {
     this.browser = await chromium.launch({ headless: true });
-    this.context = await this.browser.newContext();
+    this.context = await this.browser.newContext({ javaScriptEnabled: true });
     this.page = await this.context.newPage();
   }
 
@@ -345,7 +345,7 @@ class PlaywrightService {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
-      const screenshotBuffer = await this.page.screenshot({ fullPage: true });
+      const screenshotBuffer = await this.page.screenshot();
       console.log(screenshotBuffer, "\n\n\n");
       await createScreenshot(screenshotBuffer.toString("base64"), reportStepId);
     } catch (error) {
