@@ -3,6 +3,7 @@ const { initializeViewPorts } = require("./src/services/viewPortService");
 const {
   initializeWebElementActions,
 } = require("./src/services/webElementActionsService");
+const telegramBotService = require("./src/services/telegramBotService");
 const PORT = process.env.PORT || 3000;
 const prisma = require("./src/db/db");
 require("dotenv").config();
@@ -17,6 +18,18 @@ async function initializeApp() {
   } catch (error) {
     console.error("Ошибка при инициализации данных:", error.message);
     process.exit(1); // Остановка приложения при ошибке
+  }
+}
+
+// Инициализация телеграм бота
+async function initializeTelegramBot() {
+  try {
+    console.log("Инициализация Telegram бота...");
+    await telegramBotService.initialize();
+    console.log("Telegram бот успешно инициализирован.");
+  } catch (error) {
+    console.error("Ошибка при инициализации Telegram бота:", error.message);
+    // Не останавливаем приложение, если бот не удалось инициализировать
   }
 }
 
@@ -54,6 +67,23 @@ async function ensureSingleWorkspace() {
   }
 }
 
+// Обработка завершения приложения
+process.on('SIGINT', async () => {
+  console.log('Получен сигнал SIGINT, завершение работы...');
+  if (telegramBotService.isBotRunning()) {
+    await telegramBotService.stop();
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('Получен сигнал SIGTERM, завершение работы...');
+  if (telegramBotService.isBotRunning()) {
+    await telegramBotService.stop();
+  }
+  process.exit(0);
+});
+
 (async () => {
   try {
     const app = await startApp(); // Запускаем инициализацию приложения
@@ -62,6 +92,7 @@ async function ensureSingleWorkspace() {
       console.log(`Сервер запущен на порту ${PORT}`);
     });
     await initializeApp();
+    await initializeTelegramBot(); // Инициализируем телеграм бота после запуска сервера
   } catch (error) {
     console.error("Ошибка при запуске сервера:", error.message);
     process.exit(1); // Остановка приложения при ошибке
