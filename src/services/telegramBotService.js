@@ -681,6 +681,8 @@ class TelegramBotService {
     } catch (error) {
       logBot(`Ошибка при отправке итогового резюме в чат ${chatId}:`, error.message);
     }
+    // Добавлено: отправка алерта при наличии упавших тестов
+    await this.sendAlertIfFailedTests(failedTests, totalTests);
   }
 
   async getAnalytics(chatId, period) {
@@ -937,6 +939,21 @@ class TelegramBotService {
       logBot(`Отправлено итоговое резюме автоотчета в чат ${chatId}`);
     } catch (error) {
       logBot(`Ошибка при отправке итогового резюме автоотчета в чат ${chatId}:`, error.message);
+    }
+    // Добавлено: отправка алерта при наличии упавших тестов
+    await this.sendAlertIfFailedTests(failedTests, totalTests);
+  }
+
+  // Добавлено: функция для отправки алерта в отдельный чат при наличии упавших тестов
+  async sendAlertIfFailedTests(failedTests, totalTests) {
+    if (failedTests > 0 && process.env.TELEGRAM_ALERT_CHAT_ID) {
+      const alertText = `🚨 *ВНИМАНИЕ!*\n\nОбнаружены упавшие тесты!\n\n❌ Провалено: ${failedTests} из ${totalTests}\n\nПроверьте отчёты и примите меры!`;
+      try {
+        await this.bot.sendMessage(process.env.TELEGRAM_ALERT_CHAT_ID, alertText, { parse_mode: 'Markdown' });
+        logBot(`Отправлено алерт-сообщение о проваленных тестах в чат ${process.env.TELEGRAM_ALERT_CHAT_ID}`);
+      } catch (error) {
+        logBot(`Ошибка при отправке алерт-сообщения:`, error.message);
+      }
     }
   }
 }
