@@ -6,6 +6,7 @@ const sendReportMail = async (mail, htmlReportForMail, images = []) => {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SERVER_HOST,
     port: process.env.EMAIL_SERVER_PORT,
+    secure: true,
     auth: {
       user: process.env.EMAIL_FROM,
       pass: process.env.EMAIL_SERVER_PASSWORD,
@@ -63,6 +64,7 @@ const sendReportMail = async (mail, htmlReportForMail, images = []) => {
     attachments,
   };
 
+  await transporter.on("nodemailer log", console.log);
   await transporter.sendMail(mailOptions);
 };
 

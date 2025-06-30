@@ -14,7 +14,7 @@ class PlaywrightService {
    */
   async init() {
     this.browser = await chromium.launch({ headless: true });
-    this.context = await this.browser.newContext({ javaScriptEnabled: true });
+    this.context = await this.browser.newContext();
     this.page = await this.context.newPage();
   }
 
@@ -30,7 +30,7 @@ class PlaywrightService {
     try {
       await this.page.goto(url);
       const { id } = await createReportStep(
-        `Opened page with URL: ${url}`,
+        `Открыта страница по адресу: ${url}`,
         reportId,
         true
       );
@@ -38,7 +38,7 @@ class PlaywrightService {
       console.log(`Opened page with URL: ${url}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error opening page with URL "${url}": ${error}`,
+        `Ошибка при открытии страницы по адресу "${url}"\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -53,7 +53,7 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async click(selector, reportId) {
+  async click(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
@@ -61,7 +61,7 @@ class PlaywrightService {
       await this.page.waitForSelector(selector, { state: "visible" });
       await this.page.click(selector);
       const { id } = await createReportStep(
-        `Clicked on element with selector: ${selector}`,
+        `Клик по веб-элементу «${title}»`,
         reportId,
         true
       );
@@ -69,7 +69,7 @@ class PlaywrightService {
       console.log(`Clicked on element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error clicking on selector "${selector}": ${error}`,
+        `Ошибка при клике на элемент «${title}»"\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -85,7 +85,7 @@ class PlaywrightService {
    * @param {string} value - Значение для заполнения
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async fill(selector, value, reportId) {
+  async fill(selector, value, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
@@ -93,7 +93,7 @@ class PlaywrightService {
       await this.page.waitForSelector(selector, { state: "visible" });
       await this.page.fill(selector, value);
       const { id } = await createReportStep(
-        `Filled element with selector: ${selector}, value: ${value}`,
+        `Поле ввода «${title}» заполнено значением: «${value}»`,
         reportId,
         true
       );
@@ -101,7 +101,7 @@ class PlaywrightService {
       console.log(`Filled element with selector: ${selector}, value: ${value}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error filling selector "${selector}": ${error}`,
+        `Ошибка при заполнении поля ввода «${title}» значнем «${value}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -116,7 +116,7 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async checkVisibility(selector, reportId) {
+  async checkVisibility(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
@@ -126,7 +126,7 @@ class PlaywrightService {
         throw new Error(`Element with selector "${selector}" is not visible`);
       }
       const { id } = await createReportStep(
-        `Checked visibility of element with selector: ${selector}`,
+        `Проверена видимость веб-элемента «${title}»`,
         reportId,
         true
       );
@@ -134,7 +134,7 @@ class PlaywrightService {
       console.log(`Checked visibility of element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error checking visibility for selector "${selector}": ${error}`,
+        `Ошибка при проверке видимости веб-элемента «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -153,14 +153,14 @@ class PlaywrightService {
    * @param {string} key - Клавиша (например, Enter, Tab и т.д.)
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async pressKey(selector, key, reportId) {
+  async pressKey(selector, key, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.press(selector, key);
       const { id } = await createReportStep(
-        `Pressed key "${key}" on element with selector: ${selector}`,
+        `Нажата клавиша «${key}» на веб-элементе «${title}»`,
         reportId,
         true
       );
@@ -168,7 +168,7 @@ class PlaywrightService {
       console.log(`Pressed key "${key}" on element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error pressing key "${key}" on selector "${selector}": ${error}`,
+        `Ошибка при нажатии на клавишу «${key}» на веб-элементе «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -186,14 +186,14 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async clearInput(selector, reportId) {
+  async clearInput(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.fill(selector, "");
       const { id } = await createReportStep(
-        `Cleared input field with selector: ${selector}`,
+        `Очищенное поле ввода «${title}»`,
         reportId,
         true
       );
@@ -201,7 +201,7 @@ class PlaywrightService {
       console.log(`Cleared input field with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error clearing input field with selector "${selector}": ${error}`,
+        `Ошибка при очистке поля ввода «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -219,14 +219,14 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async doubleClick(selector, reportId) {
+  async doubleClick(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.dblclick(selector);
       const { id } = await createReportStep(
-        `Double-clicked on element with selector: ${selector}`,
+        `Двойной щелчок по веб-элементу «${title}»`,
         reportId,
         true
       );
@@ -234,7 +234,7 @@ class PlaywrightService {
       console.log(`Double-clicked on element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error double-clicking on selector "${selector}": ${error}`,
+        `Ошибка при двойном щелчке по веб-элементу «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -249,14 +249,14 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async rightClick(selector, reportId) {
+  async rightClick(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.click(selector, { button: "right" });
       const { id } = await createReportStep(
-        `Right-clicked on element with selector: ${selector}`,
+        `Щелчок правой кнопкой мыши по веб-элементу «${title}»`,
         reportId,
         true
       );
@@ -264,7 +264,7 @@ class PlaywrightService {
       console.log(`Right-clicked on element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error right-clicking on selector "${selector}": ${error}`,
+        `Ошибка при щелчке правой кнопкой мыши по веб-элементу «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -279,14 +279,14 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async focus(selector, reportId) {
+  async focus(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.focus(selector);
       const { id } = await createReportStep(
-        `Focused on element with selector: ${selector}`,
+        `Фокус на веб-элемент «${title}»`,
         reportId,
         true
       );
@@ -294,7 +294,7 @@ class PlaywrightService {
       console.log(`Focused on element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error focusing on selector "${selector}": ${error}`,
+        `Ошибка фокуса на веб-элемент «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -309,7 +309,7 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async blur(selector, reportId) {
+  async blur(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
@@ -318,7 +318,7 @@ class PlaywrightService {
         document.querySelector(selector).blur();
       }, selector);
       const { id } = await createReportStep(
-        `Blurred element with selector: ${selector}`,
+        `Действие blur на веб-элемент «${title}»`,
         reportId,
         true
       );
@@ -326,7 +326,7 @@ class PlaywrightService {
       console.log(`Blurred element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error blurring selector "${selector}": ${error}`,
+        `Ошибка действия blur на веб-элемент «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -358,14 +358,14 @@ class PlaywrightService {
    * @param {string} selector - Селектор элемента
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async hover(selector, reportId) {
+  async hover(selector, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.hover(selector);
       const { id } = await createReportStep(
-        `Hovered over element with selector: ${selector}`,
+        `Действие hover на веб-элемент «${title}»`,
         reportId,
         true
       );
@@ -373,7 +373,7 @@ class PlaywrightService {
       console.log(`Hovered over element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error hovering over selector "${selector}": ${error}`,
+        `Ошибка действия hover на веб-элемент «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -389,7 +389,7 @@ class PlaywrightService {
    * @param {string} expectedText - Ожидаемый текст
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async checkText(selector, expectedText, reportId) {
+  async checkText(selector, expectedText, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
@@ -401,7 +401,7 @@ class PlaywrightService {
         );
       }
       const { id } = await createReportStep(
-        `Checked text for element with selector: ${selector}, expected: ${expectedText}`,
+        `Проверен текст веб-элемента «${title}»`,
         reportId,
         true
       );
@@ -409,7 +409,7 @@ class PlaywrightService {
       console.log(`Checked text for element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error checking text for selector "${selector}": ${error}`,
+        `Ошибка проверки текста веб-элемента «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -425,14 +425,14 @@ class PlaywrightService {
    * @param {number} timeout - Время ожидания в миллисекундах
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async waitForElement(selector, timeout, reportId) {
+  async waitForElement(selector, timeout, reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.waitForSelector(selector, { timeout });
       const { id } = await createReportStep(
-        `Waited for element with selector: ${selector}`,
+        `Ожидание веб-элемента «${title}»`,
         reportId,
         true
       );
@@ -440,7 +440,7 @@ class PlaywrightService {
       console.log(`Waited for element with selector: ${selector}`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error waiting for selector "${selector}": ${error}`,
+        `Ошибка ожидания веб-элемента «${title}»\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -454,18 +454,18 @@ class PlaywrightService {
    * Навигация назад
    * @param {string} reportId - ID репорта (для создания скриншота)
    */
-  async goBack(reportId) {
+  async goBack(reportId, title) {
     if (!this.page) {
       throw new Error("Page is not initialized. Call init() first.");
     }
     try {
       await this.page.goBack();
-      const { id } = await createReportStep(`Navigated back`, reportId, true);
+      const { id } = await createReportStep(`Навигация назад`, reportId, true);
       await this.takeScreenshot(id);
       console.log(`Navigated back`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error navigating back: ${error}`,
+        `Ошибка при навигации назад\nТекст ошибки: ${error}`,
         reportId,
         false
       );
@@ -485,16 +485,12 @@ class PlaywrightService {
     }
     try {
       await this.page.goForward();
-      const { id } = await createReportStep(
-        `Navigated forward`,
-        reportId,
-        true
-      );
+      const { id } = await createReportStep(`Навигация вперед`, reportId, true);
       await this.takeScreenshot(id);
       console.log(`Navigated forward`);
     } catch (error) {
       const { id } = await createReportStep(
-        `Error navigating forward: ${error}`,
+        `Ошибка при навигации вперед\nТекст ошибки: ${error}`,
         reportId,
         false
       );

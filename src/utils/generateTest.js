@@ -2,6 +2,11 @@ const fs = require("fs");
 const path = require("path");
 const prismaPool = require("./prismaPool");
 
+// Получаем цвет подсветки из переменной окружения или используем значение по умолчанию
+const HIGHLIGHT_BOXSHADOW_COLOR = process.env.HIGHLIGHT_BOXSHADOW_COLOR;
+// Получаем стиль border из переменной окружения или используем значение по умолчанию
+const HIGHLIGHT_BORDER_STYLE = process.env.HIGHLIGHT_BORDER_STYLE ;
+
 // Создаем директорию для тестов, если она не существует
 const ensureDirectoryExists = (dirPath) => {
   if (!fs.existsSync(dirPath)) {
@@ -49,8 +54,8 @@ async function generateTest(testId, reportIdManual) {
       await page.evaluate((selector) => {
         const element = document.querySelector(selector);
         if (element) {
-          element.style.border = '3px solid red';
-          element.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.5)';
+          element.style.border = '${HIGHLIGHT_BORDER_STYLE}';
+          element.style.boxShadow = '${HIGHLIGHT_BOXSHADOW_COLOR}';
           element.style.transition = 'all 0.3s ease';
         }
       }, selector);
@@ -70,61 +75,75 @@ async function generateTest(testId, reportIdManual) {
 
   // Модифицируем генерацию кода шагов для добавления подсветки
   const stepsCode = test.Step.map((step) => {
-    const { selector } = step.webElement;
+    const { selector, title } = step.webElement;
     const { name: actionName } = step.action;
     const { value } = step;
 
     const safeSelector = selector.replaceAll("'", '"').replaceAll("`", '"');
-    
+
     // Для действий, работающих с элементами, добавляем подсветку
-    const elementActions = ['click', 'fill', 'hover', 'checkText', 'waitForElement', 
-                          'selectOption', 'checkVisibility', 'pressKey', 'clearInput',
-                          'doubleClick', 'rightClick', 'focus', 'blur'];
-    
+    const elementActions = [
+      "click",
+      "fill",
+      "hover",
+      "checkText",
+      "waitForElement",
+      "selectOption",
+      "checkVisibility",
+      "pressKey",
+      "clearInput",
+      "doubleClick",
+      "rightClick",
+      "focus",
+      "blur",
+    ];
+
     if (elementActions.includes(actionName)) {
       return `
         await highlightElement(page, '${safeSelector}');
-        ${getActionCode(actionName, safeSelector, value)}
+        ${getActionCode(actionName, safeSelector, value, title)}
         await unhighlightElement(page, '${safeSelector}');
       `;
     }
-    
-    return getActionCode(actionName, safeSelector, value);
-    
-    function getActionCode(action, selector, value) {
+
+    return getActionCode(actionName, safeSelector, value, title);
+
+    function getActionCode(action, selector, value, title) {
       switch (action) {
         case "click":
-          return `await playwrightService.click('${selector}', report.id);`;
+          return `await playwrightService.click('${selector}', report.id, '${title}');`;
         case "fill":
-          return `await playwrightService.fill('${selector}', '${value}', report.id);`;
+          return `await playwrightService.fill('${selector}', '${value}', report.id, '${title}');`;
         case "hover":
-          return `await playwrightService.hover('${selector}', report.id);`;
+          return `await playwrightService.hover('${selector}', report.id, '${title}');`;
         case "checkText":
-          return `await playwrightService.checkText('${selector}', '${value}', report.id);`;
+          return `await playwrightService.checkText('${selector}', '${value}', report.id, '${title}');`;
         case "waitForElement":
-          return `await playwrightService.waitForElement('${selector}', ${value || 5000}, report.id);`;
+          return `await playwrightService.waitForElement('${selector}', ${
+            value || 5000
+          }, report.id, '${title}');`;
         case "goBack":
-          return `await playwrightService.goBack(report.id);`;
+          return `await playwrightService.goBack(report.id, '${title}');`;
         case "goForward":
-          return `await playwrightService.goForward(report.id);`;
+          return `await playwrightService.goForward(report.id, '${title}');`;
         case "selectOption":
-          return `await playwrightService.selectOption('${selector}', '${value}', report.id);`;
+          return `await playwrightService.selectOption('${selector}', '${value}', report.id, '${title}');`;
         case "checkVisibility":
-          return `await playwrightService.checkVisibility('${selector}', report.id);`;
+          return `await playwrightService.checkVisibility('${selector}', report.id, '${title}');`;
         case "pressKey":
-          return `await playwrightService.pressKey('${selector}', '${value}', report.id);`;
+          return `await playwrightService.pressKey('${selector}', '${value}', report.id, '${title}');`;
         case "clearInput":
-          return `await playwrightService.clearInput('${selector}', report.id);`;
+          return `await playwrightService.clearInput('${selector}', report.id, '${title}');`;
         case "doubleClick":
-          return `await playwrightService.doubleClick('${selector}', report.id);`;
+          return `await playwrightService.doubleClick('${selector}', report.id, '${title}');`;
         case "rightClick":
-          return `await playwrightService.rightClick('${selector}', report.id);`;
+          return `await playwrightService.rightClick('${selector}', report.id, '${title}');`;
         case "focus":
-          return `await playwrightService.focus('${selector}', report.id);`;
+          return `await playwrightService.focus('${selector}', report.id, '${title}');`;
         case "blur":
-          return `await playwrightService.blur('${selector}', report.id);`;
+          return `await playwrightService.blur('${selector}', report.id, '${title}');`;
         case "takeScreenshot":
-          return `await playwrightService.takeScreenshot(report.id);`;
+          return `await playwrightService.takeScreenshot(report.id, '${title}');`;
         default:
           throw new Error(`Unsupported action: ${action}`);
       }

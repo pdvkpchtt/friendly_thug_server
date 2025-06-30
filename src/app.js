@@ -21,7 +21,7 @@ app.use(
 app.use(bodyParser.json());
 
 // храним экспресс сессию в SQLite
-const store = new SQLiteStore({ db: 'sessions.sqlite', dir: './data' });
+const store = new SQLiteStore({ db: "sessions.sqlite", dir: "./data" });
 app.use(
   session({
     store: store,
